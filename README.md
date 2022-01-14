@@ -1,1 +1,1 @@
-# sygs-nfthack
+# NFTHack Project
