@@ -1,0 +1,1 @@
+# sygs-nfthack
