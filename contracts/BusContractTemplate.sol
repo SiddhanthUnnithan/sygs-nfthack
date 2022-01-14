@@ -3,12 +3,14 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
+
+import { Base64 } from "./libraries/Base64.sol";
 
 contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
     // track token ids
-    using Counters for Cunters.Counter;
+    using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIds;
 
@@ -23,7 +25,7 @@ contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
     }
 
     // token minting -- only contract owner can call
-    function createFundingToken(address userAddress) public ownlyOwner returns (uint){
+    function createFundingToken(address userAddress) public ownlyOwner {
         uint256 newItemId = _tokenIds.current();
         
         // confirm that we haven't exceeded the token supply
@@ -38,8 +40,10 @@ contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
                         // name: {tokenSymbol}UserToken
                         _tokenSymbol,
                         'UserToken", "description": "User token representing ReplaceWithBusinessName funding round.", "attributes": [{ "trait_type": "funding_purpose", "value": "',
+                        // funding description string as is
                         _fundingDescription,
                        '"}]'
+                    )
                 )
             )
         );

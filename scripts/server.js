@@ -1,6 +1,6 @@
-import * as express from 'express';
-import { isNil, template } from 'lodash';
-import { TemplateManager } from './templateManager';
+const express = require('express');
+const lodash = require('lodash');
+const TemplateManager = require("./templateManager");
 
 // initialize app
 var app = express();
@@ -8,7 +8,7 @@ app.use(express.json());
 const SERVERPORT = 3000;
 
 // providers and managers
-const templateManager = TemplateManager();
+const templateManager = new TemplateManager();
 
 // sb-input.txt
 app.post('/api/sb_input', function(request, response){
@@ -28,7 +28,7 @@ app.post('/api/sb_input', function(request, response){
 
     var fundingAmount = validateNumeric(requestBody.fundingAmount);
 
-    if (isNil(fundingAmount)) { send400(response, 'Non-numeric funding amount provided') };
+    if (lodash.isNil(fundingAmount)) { send400(response, 'Non-numeric funding amount provided') };
 
     var numTokensIssued = validateNumeric(requestBody.numTokensIssued);
 

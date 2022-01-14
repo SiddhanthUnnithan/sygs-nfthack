@@ -1,6 +1,6 @@
-import * as fs from 'fs';
+const fs = require('fs');
 
-export class TemplateManager {
+class TemplateManager {
     async setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokens){
         this.businessName = businessName;
         this.fundingAmount = fundingAmount;
@@ -9,23 +9,24 @@ export class TemplateManager {
     }
 
     async generateSmartContractTemplate(){
-        const currentDateTimeString = undefined;
+        const currentDateTimeString = '1142021';
 
         // to-do: generate symbol
-        const generatedTokenSymbol = undefined;
+        const generatedTokenSymbol = 'TSTTKN';
 
-        const contractTemplate = `
-//SPDX-License-Identifier: Unlicense
+        const contractTemplate = `//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
+
+import { Base64 } from "./libraries/Base64.sol";
 
 contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
     // track token ids
-    using Counters for Cunters.Counter;
+    using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIds;
 
@@ -40,7 +41,7 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
     }
 
     // token minting -- only contract owner can call
-    function createFundingToken(address userAddress) public ownlyOwner returns (uint){
+    function createFundingToken(address userAddress) public onlyOwner {
         uint256 newItemId = _tokenIds.current();
         
         // confirm that we haven't exceeded the token supply
@@ -54,9 +55,10 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
                         '{ "name": "',
                         // name: {tokenSymbol}UserToken
                         _tokenSymbol,
-                        'UserToken", "description": "User token representing ${this.businessName} funding round.", "attributes": [{ "trait_type": "funding_purpose", "value": "',
+                        'UserToken", "description": "User token representing ${this.businessName} funding round of $${this.fundingAmount}.", "attributes": [{ "trait_type": "funding_purpose", "value": "',
                         _fundingDescription,
                         '"}]'
+                    )
                 )
             )
         );
@@ -66,9 +68,9 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
             abi.encodePacked("data:application/json;base64", encodedJson)
         );
 
-        console.log("\n--------------------");
+        console.log("\\n--------------------");
         console.log(finalTokenUri);
-        console.log("--------------------\n");
+        console.log("--------------------\\n");
 
         // mint nft with user address
         _safeMint(userAddress, newItemId);
@@ -82,7 +84,7 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
 }
 `       
         try {
-            fs.writeFileSync(`../contracts/${generatedTokenSymbol}.sol`, contractTemplate);
+            fs.writeFileSync(`../contracts/${generatedTokenSymbol}-private.sol`, contractTemplate);
         } catch (err) {
             return undefined;
         }
@@ -90,3 +92,5 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
         return generatedTokenSymbol;
     }
 }
+
+module.exports = TemplateManager;

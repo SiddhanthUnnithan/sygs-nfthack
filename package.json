@@ -25,7 +25,8 @@
     "ethers": "^5.5.3",
     "express": "^4.17.2",
     "hardhat": "^2.8.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "postgres": "^1.0.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2"
