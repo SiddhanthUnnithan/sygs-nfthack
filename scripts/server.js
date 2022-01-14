@@ -41,9 +41,11 @@ app.post('/api/sb_input', function(request, response){
     }
 
     // to-do: deploy contract with input options
-    templateManager.setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokensIssued);
+    await templateManager.setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokensIssued);
 
-    const contractFileName = templateManager.generateSmartContractTemplate();
+    const contractFileName = await templateManager.generateSmartContractTemplate();
+
+    if (isNil(contractFileName)) { response.status(500).json({ 'message': 'Unable to generate contract.' }) };
 });
 
 function send400(res, msg){

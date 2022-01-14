@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 export class TemplateManager {
     async setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokens){
         this.businessName = businessName;
@@ -33,7 +35,7 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
 
     string private _tokenSymbol = '${generatedTokenSymbol}';
 
-    constructor() ERC721 ("${this.businessName}FundingReplaceWithCurrentDateTimeToken", "${generatedTokenSymbol}") {
+    constructor() ERC721 ("${this.businessName}Funding${currentDateTimeString}", "${generatedTokenSymbol}") {
         console.log('Initializing funding contract for ${this.businessName}.');
     }
 
@@ -78,6 +80,13 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
         _tokenIds.increment();
     }
 }
-`
+`       
+        try {
+            fs.writeFileSync(`../contracts/${generatedTokenSymbol}.sol`, contractTemplate);
+        } catch (err) {
+            return undefined;
+        }
+
+        return generatedTokenSymbol;
     }
 }
