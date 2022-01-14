@@ -1,11 +1,14 @@
 import * as express from 'express';
-import { isNil } from 'lodash';
+import { isNil, template } from 'lodash';
+import { TemplateManager } from './templateManager';
 
 // initialize app
 var app = express();
 app.use(express.json());
-
 const SERVERPORT = 3000;
+
+// providers and managers
+const templateManager = TemplateManager();
 
 // sb-input.txt
 app.post('/api/sb_input', function(request, response){
@@ -38,6 +41,9 @@ app.post('/api/sb_input', function(request, response){
     }
 
     // to-do: deploy contract with input options
+    templateManager.setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokensIssued);
+
+    const contractFileName = templateManager.generateSmartContractTemplate();
 });
 
 function send400(res, msg){
