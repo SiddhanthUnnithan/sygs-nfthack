@@ -9,5 +9,6 @@ typechain
 #Hardhat files
 cache
 artifacts
+hardhat.config.js
 
 contracts/*-private.sol
