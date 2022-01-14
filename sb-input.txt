@@ -1,0 +1,5 @@
+What are the inputs we need from the small business to define a funding round?
+
+- Required funding amount? fundingAmount
+- Funding purpose? fundingPurpose
+- # of tokens to issue? numTokensIssued
