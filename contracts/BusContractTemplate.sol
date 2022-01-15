@@ -14,7 +14,7 @@ contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
 
     Counters.Counter private _tokenIds;
 
-    uint256 private _tokenSupply = ReplaceWithTokenSupply;
+    uint256 private _tokenSupply = 100;
 
     string private _fundingDescription = 'ReplaceWithFundingPurpose';
 
@@ -25,7 +25,7 @@ contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
     }
 
     // token minting -- only contract owner can call
-    function createFundingToken(address userAddress) public ownlyOwner {
+    function createFundingToken(address userAddress) public onlyOwner {
         uint256 newItemId = _tokenIds.current();
         
         // confirm that we haven't exceeded the token supply
@@ -61,6 +61,8 @@ contract ReplaceWithBusinessNameFundingContract is ERC721URIStorage, Ownable {
         _safeMint(userAddress, newItemId);
 
         _setTokenURI(newItemId, finalTokenUri);
+
+        _setApprovalForAll(userAddress, msg.sender, true);
 
         console.log('An NFT with the ID %s has been minted to %s', newItemId, userAddress);
 

@@ -2,17 +2,34 @@ const fs = require('fs');
 
 class TemplateManager {
     async setTemplateValues(businessName, fundingAmount, fundingPurpose, numTokens){
-        this.businessName = businessName;
-        this.fundingAmount = fundingAmount;
-        this.fundingPurpose = fundingPurpose;
-        this.tokenSupply = numTokens;
+        this._businessName = businessName;
+        this._fundingAmount = fundingAmount;
+        this._fundingPurpose = fundingPurpose;
+        this._tokenSupply = numTokens;
+    }
+
+    async getPartialTokenSymbol(){
+        // logic: remove vowels from business namd and add current date time string
+        let partialTokenSymbol = '';
+        const vowels = ['a', 'e', 'i', 'o', 'u'];
+        const businessNameLower = this._businessName.toLowerCase();
+
+        for (let idx=0; idx < businessNameLower.length; idx++){
+            if (vowels.indexOf(businessNameLower[idx]) === -1){
+                partialTokenSymbol += businessNameLower[idx];
+            }
+        }
+
+        return partialTokenSymbol;
     }
 
     async generateSmartContractTemplate(){
-        const currentDateTimeString = '1142021';
+        const currentDateTimeString = String(Date.now());
 
         // to-do: generate symbol
-        const generatedTokenSymbol = 'TSTTKN';
+        const partialTokenSymbol = await this.getPartialTokenSymbol();
+
+        const generatedTokenSymbol = partialTokenSymbol + currentDateTimeString;
 
         const contractTemplate = `//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
@@ -24,20 +41,20 @@ import "hardhat/console.sol";
 
 import { Base64 } from "./libraries/Base64.sol";
 
-contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
+contract ${generatedTokenSymbol}FundingContract is ERC721URIStorage, Ownable {
     // track token ids
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIds;
 
-    uint256 private _tokenSupply = ${this.tokenSupply};
+    uint256 private _tokenSupply = ${this._tokenSupply};
 
-    string private _fundingDescription = '${this.fundingPurpose}';
+    string private _fundingDescription = '${this._fundingPurpose}';
 
     string private _tokenSymbol = '${generatedTokenSymbol}';
 
-    constructor() ERC721 ("${this.businessName}Funding${currentDateTimeString}", "${generatedTokenSymbol}") {
-        console.log('Initializing funding contract for ${this.businessName}.');
+    constructor() ERC721 ("${this._businessName}Funding${currentDateTimeString}", "${generatedTokenSymbol}") {
+        console.log('Initializing funding contract for ${this._businessName}.');
     }
 
     // token minting -- only contract owner can call
@@ -55,7 +72,7 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
                         '{ "name": "',
                         // name: {tokenSymbol}UserToken
                         _tokenSymbol,
-                        'UserToken", "description": "User token representing ${this.businessName} funding round of $${this.fundingAmount}.", "attributes": [{ "trait_type": "funding_purpose", "value": "',
+                        'UserToken", "description": "User token representing ${this._businessName} funding round of $${this._fundingAmount}.", "attributes": [{ "trait_type": "funding_purpose", "value": "',
                         _fundingDescription,
                         '"}]'
                     )
@@ -84,8 +101,9 @@ contract ${this.businessName}FundingContract is ERC721URIStorage, Ownable {
 }
 `       
         try {
-            fs.writeFileSync(`../contracts/${generatedTokenSymbol}-private.sol`, contractTemplate);
+            fs.writeFileSync(`./contracts/${generatedTokenSymbol}FundingContract.sol`, contractTemplate);
         } catch (err) {
+            console.log(err);
             return undefined;
         }
 
