@@ -1,8 +1,5 @@
 const hre = require("hardhat");
 const MappingManager = require("./mappingManager");
-const symbolBusinessMapping = require('./utils/SymbolBusinessMapping.json');
-
-const MAPPINGCONTRACTADDRESS = '0x2ac9D7122eF1B82412B8e9619221eF7159154275';
 
 // providers and managers
 const mappingManager = new MappingManager();

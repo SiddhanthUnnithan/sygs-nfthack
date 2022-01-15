@@ -1,6 +1,8 @@
+const { request, response } = require('express');
 const express = require('express');
 const lodash = require('lodash');
 const DeploymentManager = require('./deploymentManager');
+const MappingManager = require('./mappingManager');
 const TemplateManager = require("./templateManager");
 
 // initialize app
@@ -11,6 +13,7 @@ const SERVERPORT = 3000;
 // providers and managers
 const templateManager = new TemplateManager();
 const deploymentManager = new DeploymentManager();
+const mappingManager = new MappingManager();
 
 // sb-input.txt
 app.post('/api/sb_input', async function(request, response){
@@ -67,6 +70,38 @@ app.post('/api/sb_input', async function(request, response){
     const deployedContractAddress = await deploymentManager.getContractAddress();
 
     response.status(200).json({ 'message': 'Successfully deployed business contract.', 'contractAddress': deployedContractAddress});
+});
+
+app.get('/api/get_token_symbols', async function (request, response){
+    const businessList = await mappingManager.getBusinessList();
+
+    if (lodash.isNil(businessList)){
+        response.status(500).json({ 'message': 'Unable to retrieve list of businesses.' });
+    }
+
+    response.status(200).json({ 'message': 'Retrieved list of businesses.', 'businessList': businessList });
+});
+
+app.get('/api/get_contract_address', async function (request, response){
+    const tokenSymbol = request.body.tokenSymbol;
+    
+    if (lodash.isNil(tokenSymbol)){
+        send400(response, 'Invalid token symbol provided.');
+    }
+
+    const validTokenSwitch = await mappingManager.isValidToken(tokenSymbol);
+
+    if (!validTokenSwitch){
+        send400(response, 'Token not found.');
+    }
+
+    const fundingContractAddress = await mappingManager.getFundingContractAddress(tokenSymbol);
+
+    if (lodash.isNil(fundingContractAddress)){
+        send400(response, 'Unable to retrieve funding contract address for provided token.');
+    }
+
+    response.status(200).json({ 'message': 'Retrieved funding contract address', 'fundingContractAddress': fundingContractAddress });
 });
 
 function send400(res, msg){
