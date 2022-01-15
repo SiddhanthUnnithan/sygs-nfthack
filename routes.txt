@@ -1,0 +1,28 @@
+/home
+- reuse godaddy homepage
+
+/faq
+- reuse godaddy faqs
+
+/contact
+- reuse godaddy (copy)
+
+/new-funding-round
+- page for business to input funding round information
+- output
+    - HTML code to embed in storefront which leads to /funding/<token-symbol>
+    - Ether/polygon scan to deployed contract address
+
+/funding/<token-symbol>
+- page for investor to provide funds
+    - Setup (dynamic)
+        - Metamask wallet connect
+    - Circle payment layer
+        - show total payment given 4.9% fee and $0.3 transaction costs
+- output
+    - copy for "payment successful and token has issued"
+
+/funding/<token-symbol>/redeem
+- page for investor to validate ownership of token
+- output
+    - discount code
