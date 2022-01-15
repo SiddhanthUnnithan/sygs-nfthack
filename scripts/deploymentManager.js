@@ -1,7 +1,11 @@
 const hre = require("hardhat");
+const MappingManager = require("./mappingManager");
 const symbolBusinessMapping = require('./utils/SymbolBusinessMapping.json');
 
 const MAPPINGCONTRACTADDRESS = '0x2ac9D7122eF1B82412B8e9619221eF7159154275';
+
+// providers and managers
+const mappingManager = new MappingManager();
 
 class DeploymentManager {
     async setDeploymentValues(contractName, tokenSymbol, businessName){
@@ -33,24 +37,12 @@ class DeploymentManager {
             console.log(err);
             return false;
         }
-    
-        const storeSwitch = this.storeContractAddress();
+        
+        const addBusinessSwitch = await mappingManager.addNewBusiness(this._tokenSymbol, this._businessName, this.contractAddress);
 
-        if (!storeSwitch) { return false };
+        if (!addBusinessSwitch) { return false };
 
         return true;
-    }
-
-    async storeContractAddress(){
-        // store contract on chain
-        const [contractDeployer, ] = await hre.ethers.getSigners();
-
-        const mappingContract = new hre.ethers.Contract(MAPPINGCONTRACTADDRESS, symbolBusinessMapping.abi, contractDeployer);
-    
-        // contract
-        const storeAddressSwitch = await mappingContract.addNewBusiness(this._tokenSymbol, this._businessName, this.contractAddress);
-
-        return storeAddressSwitch;
     }
 
     async getContractAddress(){
