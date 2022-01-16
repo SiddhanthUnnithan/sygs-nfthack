@@ -1,19 +1,27 @@
 const { request, response } = require('express');
 const express = require('express');
 const lodash = require('lodash');
+const cors = require('cors');
 const DeploymentManager = require('./deploymentManager');
 const MappingManager = require('./mappingManager');
 const TemplateManager = require("./templateManager");
+const FundingContractManager = require("./fundingContractManager");
 
 // initialize app
 var app = express();
+app.use(cors());
 app.use(express.json());
-const SERVERPORT = 3000;
+const SERVERPORT = 5678;
 
 // providers and managers
 const templateManager = new TemplateManager();
 const deploymentManager = new DeploymentManager();
 const mappingManager = new MappingManager();
+const fundingContractManager = new FundingContractManager();
+
+app.get("/", async function(request, response){
+    response.status(200).json({'message': 'Hello from Sygs API!'});
+});
 
 // sb-input.txt
 app.post('/api/sb_input', async function(request, response){
@@ -73,6 +81,8 @@ app.post('/api/sb_input', async function(request, response){
 });
 
 app.get('/api/get_token_symbols', async function (request, response){
+    await mappingManager.initializeContractReference();
+
     const businessList = await mappingManager.getBusinessList();
 
     if (lodash.isNil(businessList)){
@@ -89,6 +99,8 @@ app.get('/api/get_contract_address', async function (request, response){
         send400(response, 'Invalid token symbol provided.');
     }
 
+    await mappingManager.initializeContractReference();
+
     const validTokenSwitch = await mappingManager.isValidToken(tokenSymbol);
 
     if (!validTokenSwitch){
@@ -102,6 +114,33 @@ app.get('/api/get_contract_address', async function (request, response){
     }
 
     response.status(200).json({ 'message': 'Retrieved funding contract address', 'fundingContractAddress': fundingContractAddress });
+});
+
+app.post('/api/mint', async function (request, response){
+    if (lodash.isNil(request.body.tokenSymbol) || lodash.isNil(request.body.userAddress)){
+        send400(response, 'One or more of the request options was invalid.');
+    }
+
+    // get contract address based on token symbol
+    await mappingManager.initializeContractReference();
+
+    const fundingContractAddress = mappingManager.getFundingContractAddress(tokenSymbol);
+
+    if (lodash.isNil(fundingContractAddress)){
+        send400(response, `Unable to get contract address for token symbol: ${tokenSymbol}`);
+    }
+
+    const initFcManagerSwitch = await fundingContractManager.initialize(request.body.tokenSymbol, fundingContractAddress);
+
+    if (!initFcManagerSwitch) {
+        send500(response, 'Unable to create contract reference for minting.');
+    }
+
+    const mintSwitch = await fundingContractManager.mint(request.body.userAddress);
+
+    if (!mintSwitch){
+        send500(response, 'Unable to mint.');
+    }
 });
 
 function send400(res, msg){

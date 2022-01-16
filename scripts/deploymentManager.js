@@ -9,6 +9,7 @@ class DeploymentManager {
         this._contractName = contractName;
         this._tokenSymbol = tokenSymbol;
         this._businessName = businessName;
+        await mappingManager.initializeContractReference();
     }
 
     async compileContract(){

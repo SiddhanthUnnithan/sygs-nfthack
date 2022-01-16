@@ -4,7 +4,7 @@ const symbolBusinessMapping = require('./utils/SymbolBusinessMapping.json');
 const MAPPINGCONTRACTADDRESS = '0x2ac9D7122eF1B82412B8e9619221eF7159154275';
 
 class MappingManager {
-    constructor () {
+    async initializeContractReference() {
         // initialize reference to contract
         const [contractDeployer, ] = await hre.ethers.getSigners();
 
