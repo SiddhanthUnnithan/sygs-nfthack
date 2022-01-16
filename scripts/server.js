@@ -124,7 +124,7 @@ app.post('/api/mint', async function (request, response){
     // get contract address based on token symbol
     await mappingManager.initializeContractReference();
 
-    const fundingContractAddress = mappingManager.getFundingContractAddress(tokenSymbol);
+    const fundingContractAddress = await mappingManager.getFundingContractAddress(request.body.tokenSymbol);
 
     if (lodash.isNil(fundingContractAddress)){
         send400(response, `Unable to get contract address for token symbol: ${tokenSymbol}`);
@@ -136,11 +136,46 @@ app.post('/api/mint', async function (request, response){
         send500(response, 'Unable to create contract reference for minting.');
     }
 
-    const mintSwitch = await fundingContractManager.mint(request.body.userAddress);
+    const mintedTokenId = await fundingContractManager.mint(request.body.userAddress);
 
-    if (!mintSwitch){
+    if (lodash.isNil(mintedTokenId)){
         send500(response, 'Unable to mint.');
     }
+
+    response.status(200).json({ 'message': 'Successfully minted token.', 'tokenId': mintedTokenId });
+});
+
+app.post('/api/check_token_existence', async function (request, response){
+    if (lodash.isNil(request.body.tokenSymbol) || lodash.isNil(request.body.userAddress)){
+        send400(response, 'One or more of the request options was invalid.');
+    }
+
+    // get contract address based on token symbol
+    await mappingManager.initializeContractReference();
+
+    const fundingContractAddress = await mappingManager.getFundingContractAddress(request.body.tokenSymbol);
+
+    if (lodash.isNil(fundingContractAddress)){
+        send400(response, `Unable to get contract address for token symbol: ${tokenSymbol}`);
+    }
+
+    const initFcManagerSwitch = await fundingContractManager.initialize(request.body.tokenSymbol, fundingContractAddress);
+
+    if (!initFcManagerSwitch) {
+        send500(response, 'Unable to create contract reference for minting.');
+    }
+
+    const tokenBalance = await fundingContractManager.validateTokenExistence(request.body.userAddress);
+
+    if (lodash.isNil(tokenBalance)) {
+        send500(response, `Unable to check token balance for address: ${request.body.userAddress}`);
+    } else if (!tokenBalance){
+        // successfully able to retrieve token balance but it was 0
+        response.status(200).json({ 'message': 'Token balance checked', 'tokenBalance': 0});
+    }
+
+    // we return a token balance of 1 to indicate that the token exists (not optimal)
+    response.status(200).json({ 'message': 'Token balance checked.', 'tokenBalance': 1 });
 });
 
 function send400(res, msg){

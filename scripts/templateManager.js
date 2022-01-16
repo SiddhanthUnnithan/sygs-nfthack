@@ -58,7 +58,7 @@ contract ${generatedTokenSymbol}FundingContract is ERC721URIStorage, Ownable {
     }
 
     // token minting -- only contract owner can call
-    function createFundingToken(address userAddress) public onlyOwner {
+    function createFundingToken(address userAddress) public onlyOwner returns (uint256){
         uint256 newItemId = _tokenIds.current();
         
         // confirm that we haven't exceeded the token supply
@@ -97,6 +97,8 @@ contract ${generatedTokenSymbol}FundingContract is ERC721URIStorage, Ownable {
         console.log('An NFT with the ID %s has been minted to %s', newItemId, userAddress);
 
         _tokenIds.increment();
+
+        return newItemId;
     }
 }
 `       

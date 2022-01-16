@@ -1,1 +1,1 @@
-npx hardhat run ../scripts/deployMappingContract.js
+npx hardhat run ../scripts/deployMappingContract.js --network matic

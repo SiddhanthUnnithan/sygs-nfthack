@@ -11,7 +11,7 @@ contract SymbolBusinessMapping {
     // define a business
     struct Business {
         string businessName;
-        address contractAddress;
+        string contractAddress;
     }
 
     // define mapping
@@ -20,7 +20,7 @@ contract SymbolBusinessMapping {
     // store all token symbols
     string[] private tokenSymbols;
 
-    function addNewBusiness(string memory tokenSymbol, string memory businessName, address fundingContractAddress) public returns (bool){
+    function addNewBusiness(string memory tokenSymbol, string memory businessName, string memory fundingContractAddress) public returns (bool){
         Business memory business = Business(businessName, fundingContractAddress);
 
         symbolBusinessMap[tokenSymbol] = business;
@@ -30,7 +30,7 @@ contract SymbolBusinessMapping {
         return true;
     }
 
-    function getBusinessFundingContract(string memory tokenSymbol) public view returns (address){
+    function getBusinessFundingContract(string memory tokenSymbol) public view returns (string memory){
         return symbolBusinessMap[tokenSymbol].contractAddress;
     }
 
