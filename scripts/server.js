@@ -77,7 +77,7 @@ app.post('/api/sb_input', async function(request, response){
 
     const deployedContractAddress = await deploymentManager.getContractAddress();
 
-    response.status(200).json({ 'message': 'Successfully deployed business contract.', 'contractAddress': deployedContractAddress});
+    response.status(200).json({ 'message': 'Successfully deployed business contract.', 'contractAddress': deployedContractAddress, 'tokenSymbol': contractTokenSymbol});
 });
 
 app.get('/api/get_token_symbols', async function (request, response){
