@@ -12,3 +12,5 @@ artifacts
 hardhat.config.js
 
 contracts/*FundingContract.sol
+
+scripts/utils/privateConstants.js
