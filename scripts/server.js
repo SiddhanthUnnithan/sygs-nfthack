@@ -136,13 +136,15 @@ app.post('/api/mint', async function (request, response){
         send500(response, 'Unable to create contract reference for minting.');
     }
 
-    const mintedTokenId = await fundingContractManager.mint(request.body.userAddress);
+    let mintedTokenIdObject = await fundingContractManager.mint(request.body.userAddress);
 
-    if (lodash.isNil(mintedTokenId)){
+    if (lodash.isNil(mintedTokenIdObject)){
         send500(response, 'Unable to mint.');
     }
 
-    response.status(200).json({ 'message': 'Successfully minted token.', 'tokenId': mintedTokenId });
+    mintedTokenIdObject['message'] = 'Successfully minted token.'
+
+    response.status(200).json(mintedTokenIdObject);
 });
 
 app.post('/api/check_token_existence', async function (request, response){
