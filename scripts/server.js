@@ -92,7 +92,7 @@ app.get('/api/get_token_symbols', async function (request, response){
     response.status(200).json({ 'message': 'Retrieved list of businesses.', 'businessList': businessList });
 });
 
-app.get('/api/get_contract_address', async function (request, response){
+app.post('/api/get_contract_address', async function (request, response){
     const tokenSymbol = request.body.tokenSymbol;
     
     if (lodash.isNil(tokenSymbol)){
@@ -142,7 +142,9 @@ app.post('/api/mint', async function (request, response){
         send500(response, 'Unable to mint.');
     }
 
-    mintedTokenIdObject['message'] = 'Successfully minted token.'
+    mintedTokenIdObject['message'] = 'Successfully minted token.';
+
+    mintedTokenIdObject['contractAddress'] = fundingContractAddress;
 
     response.status(200).json(mintedTokenIdObject);
 });
