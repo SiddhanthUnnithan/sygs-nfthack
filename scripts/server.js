@@ -6,6 +6,7 @@ const DeploymentManager = require('./deploymentManager');
 const MappingManager = require('./mappingManager');
 const TemplateManager = require("./templateManager");
 const FundingContractManager = require("./fundingContractManager");
+const PrivateConstantsManager = require("./utils/privateConstants"); 
 
 // initialize app
 var app = express();
@@ -18,6 +19,11 @@ const templateManager = new TemplateManager();
 const deploymentManager = new DeploymentManager();
 const mappingManager = new MappingManager();
 const fundingContractManager = new FundingContractManager();
+const privateConstantsManager = new PrivateConstantsManager();
+
+// stripe import -- we need the constants manager
+const stripeTestApiKey = privateConstantsManager.getConstant('stripeTestKey');
+const stripe = require("stripe")(`${stripeTestApiKey}`);
 
 app.get("/", async function(request, response){
     response.status(200).json({'message': 'Hello from Sygs API!'});
@@ -180,6 +186,24 @@ app.post('/api/check_token_existence', async function (request, response){
 
     // we return a token balance of 1 to indicate that the token exists (not optimal)
     response.status(200).json({ 'message': 'Token balance checked.', 'tokenBalance': 1 });
+});
+
+app.post('/create-payment-intent', async (req, res) => {
+    const { items } = req.body;
+
+    // create a payment intent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+        // hard-coded amount
+        amount: 100,
+        currency: "usd",
+        automatic_payment_methods: {
+            enabled: true
+        },
+    });
+
+    res.send({
+        clientSecret: paymentIntent.client_secret,
+    });
 });
 
 function send400(res, msg){
