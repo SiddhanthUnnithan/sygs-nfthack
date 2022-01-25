@@ -1,8 +1,11 @@
 const hre = require("hardhat");
 const { isNil } = require("lodash");
+const PrivateConstantsManager = require("./utils/privateConstants");
 
 // to-do: change to be environment based (vars)
 const targetNetwork = 'rinkeby';
+const privateConstantsManager = new PrivateConstantsManager();
+const alchemyApiKey = privateConstantsManager.getConstant('alchemyApiKey');
 
 class FundingContractManager {
     async initialize(tokenSymbol, contractAddress){
@@ -26,10 +29,14 @@ class FundingContractManager {
     async mint(userAddress){
         try {
             const tokenIdObj = await this.fundingContract.createFundingToken(userAddress);
+
+            console.log(`Minting txn: tokenIdObj['hash']`);
             
             try {
                 // return the token id if the transaction is successful
-                const provider = new hre.ethers.getDefaultProvider('rinkeby');
+                const provider = new hre.ethers.getDefaultProvider('rinkeby', {
+                    alchemy: alchemyApiKey
+                });
 
                 const txnReceipt = await provider.waitForTransaction(tokenIdObj['hash']);
 
