@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "strip": "^3.0.0",
+    "stripe": "^8.199.0"
   }
 }
